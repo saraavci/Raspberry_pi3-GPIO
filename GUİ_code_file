@@ -1,0 +1,88 @@
+import sys
+import RPi.GPIO as GPIO
+import time
+from PyQt5.QtWidgets import QWidget, QCheckBox, QApplication, QLabel
+from PyQt5.QtCore import Qt
+
+class Example(QWidget): 
+	#global list
+    GPIO.setmode(GPIO.BOARD)
+    cb = ['']*41
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+    def initUI(self):
+        x = 20
+        y = 20
+        global cb
+        cb = [''] * 41
+        for i in range(40,0,-1):
+            label_Temp_Power = "label_Power" + str(i)
+            label_Ground = "label_Ground" + str(i)
+            label_IDSD = "label_IDSD"
+            label_IDSC = "label_IDSC"
+            #power
+            if (i == 4 or i == 2 ):
+                label_Temp_Power = QCheckBox('Power' + " (5V)" , self)
+                label_Temp_Power.setEnabled(False)
+                label_Temp_Power.move(5,x)
+                x = x + 30   
+                continue
+            if i == 1:
+                label_Temp_Power = QCheckBox('Power' + " (3.3V)" , self)
+                label_Temp_Power.setEnabled(False)
+                label_Temp_Power.move(120,y)
+                y = y + 30
+                continue
+            #ground
+            if i == 6 or i == 9 or i == 14 or  i == 17 or i ==20 or i == 25 or i ==30 or i == 34 or i ==39 :
+                if i % 2 == 0:
+                    label_Ground = QCheckBox('Ground_' + str(i) , self)
+                    label_Ground.setEnabled(False)
+                    label_Ground.move(5,x)
+                    x = x + 30
+                    continue
+                if i % 2 == 1:
+                    label_Ground = QCheckBox('Ground_' + str(i) , self)
+                    label_Ground.setEnabled(False)
+                    label_Ground.move(120,y)
+                    y = y + 30
+                    continue
+            #IDSD IDSC    
+            if i == 27:
+                label_IDSD = QCheckBox("IDSD_27", self)
+                label_IDSD.setEnabled(False)
+                label_IDSD.move(120,y)
+                y = y + 30
+                continue
+            if i == 28:
+                label_IDSC = QCheckBox("IDSC_28", self)
+                label_IDSC.setEnabled(False)
+                label_IDSC.move(5, x)
+                x = x + 30
+                continue
+            #GPIO
+            cb[i] = QCheckBox('GPIO_'+str(i) , self)
+            if i % 2 == 0:
+                cb[i].move(5,x)
+                x = x + 30
+            if i % 2 == 1:
+                cb[i].move(120,y)
+                y = y + 30
+            GPIO.setup(i, GPIO.OUT)
+            cb[i].stateChanged.connect(self.Checkbox_Control)
+        self.setGeometry(400, 200, 250, 650)
+        self.setWindowTitle('GPIO Control Panel')
+        self.show()
+    def Checkbox_Control(self,state):
+        for i in range(3,40,1):
+            if (i == 4 or i == 6 or i == 9 or i == 14 or  i == 17 or i ==20 or i == 25 or i == 27 or i == 28 or i ==30 or i == 34 or i ==39):
+                continue
+            if cb[i].isChecked():
+                GPIO.output(i, True)
+            else:
+                GPIO.output(i, False)
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = Example()
+    sys.exit(app.exec_())
